@@ -25,7 +25,7 @@ public class NguoiDungDatabase extends Connection {
             if (rs.next()) {
                 return rs.getString(1);
             }
-            return password;
+            return "false";
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -33,20 +33,24 @@ public class NguoiDungDatabase extends Connection {
 
     public String Register(NguoiDung nguoiDung) {
         if(checkTenDN(nguoiDung.getTenDN())){
-            String sql = String.format("INSERT INTO NguoiDung Values('%s','%s','%s','%s','%s','%s')"
-                    , nguoiDung.getMaND(), nguoiDung.getTenTK(), nguoiDung.getTenDN(), nguoiDung.getMatkhau()
-                    , nguoiDung.getSoDT(), nguoiDung.getDiaChi());
-            try {
-                int row = statement.executeUpdate(sql);
-                return String.valueOf(row);
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+            if(checkSDT(nguoiDung.getSoDT())){
+                String sql = String.format("INSERT INTO NguoiDung Values('%s','%s','%s','%s','%s','%s')"
+                        , nguoiDung.getMaND(), nguoiDung.getTenTK(), nguoiDung.getTenDN(), nguoiDung.getMatkhau()
+                        , nguoiDung.getSoDT(), nguoiDung.getDiaChi());
+                try {
+                    int row = statement.executeUpdate(sql);
+                    return String.valueOf(row);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            else{
+                return "falseSDT";
             }
         }
         else{
-            return "false";
+            return "falseND";
         }
-
     }
 
     private Boolean checkTenDN(String tenDN){
@@ -61,4 +65,18 @@ public class NguoiDungDatabase extends Connection {
             throw new RuntimeException(e);
         }
     }
+
+    private Boolean checkSDT(String soDT){
+        String sql = String.format("Select maND from NguoiDung Where soDT = '%s'",soDT);
+        try{
+            rs = statement.executeQuery(sql);
+            if(rs.next()){
+                return false;
+            }
+            return true;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
